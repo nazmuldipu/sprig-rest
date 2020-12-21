@@ -1,6 +1,7 @@
 package com.unololtd.nazmul.springrest.controller;
 
 import com.unololtd.nazmul.springrest.assembler.UserModelAssembler;
+import com.unololtd.nazmul.springrest.common.MyUtil;
 import com.unololtd.nazmul.springrest.entity.User;
 import com.unololtd.nazmul.springrest.exception.UserNotFoundException;
 import com.unololtd.nazmul.springrest.service.UserService;
@@ -67,7 +68,7 @@ public class UserController {
                 .body(entityModel);
     }
 
-    @GetMapping("")
+    @GetMapping("/list")
     public CollectionModel<EntityModel<User>> all() {
 
         List<EntityModel<User>> users = service.getAll().stream() //
@@ -78,29 +79,14 @@ public class UserController {
                 linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
-    @GetMapping(value = "/page")
-    public ResponseEntity<PagedModel<User>> AllProducts(Pageable pageable, PagedResourcesAssembler assembler) {
+    @GetMapping(value = "")
+    public ResponseEntity<PagedModel<User>> page(Pageable pageable, PagedResourcesAssembler passembler) {
         Page<User> users = this.service.getAll(pageable);
-        PagedModel<User> pr = assembler.toModel(users, linkTo(UserController.class).withSelfRel());
-        System.out.println(pr);
-        System.out.println(pr.getLinks("first"));
+        PagedModel<User> ur = passembler.toModel(users, linkTo(UserController.class).slash("/page").withSelfRel());
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.add("Link", createLinkHeader(pr));
-        return new ResponseEntity<>(assembler.toModel(users, linkTo(UserController.class).withSelfRel()), responseHeaders, HttpStatus.OK);
+        responseHeaders.add("Link", MyUtil.createLinkHeader(ur));
+        return new ResponseEntity(ur, responseHeaders, HttpStatus.OK);
     }
-
-    private String createLinkHeader(PagedModel<User> pr) {
-        final StringBuilder linkHeader = new StringBuilder();
-        linkHeader.append(buildLinkHeader(pr.getLinks("first").get(0).getHref(), "first"));
-        linkHeader.append(", ");
-        linkHeader.append(buildLinkHeader(pr.getLinks("next").get(0).getHref(), "next"));
-        return linkHeader.toString();
-    }
-
-    public static String buildLinkHeader(final String uri, final String rel) {
-        return "<" + uri + ">; rel=\"" + rel + "\"";
-    }
-
 
     @GetMapping("/{id}")
     public EntityModel<User> one(@PathVariable Long id) {
