@@ -1,6 +1,7 @@
 package com.unololtd.nazmul.springrest.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-public class User {
+public class User extends RepresentationModel<User> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -29,6 +30,14 @@ public class User {
 
     //Constructor with name, phone, email
     public User(String name, String phone, String email) {
+        this.phone = phone;
+        this.email = email;
+        this.name = name;
+        this.username = phone;
+    }
+
+    public User(Long id, String name, String phone, String email) {
+        this.id = id;
         this.phone = phone;
         this.email = email;
         this.name = name;
@@ -128,8 +137,23 @@ public class User {
         return Objects.hash(this.id, this.name, this.username);
     }
 
+//    @Override
+//    public String toString() {
+//        return "Employee{" + "id=" + this.id + ", name='" + this.name + '\'' + ", username='" + this.username + '\'' + '}';
+//    }
+
     @Override
     public String toString() {
-        return "Employee{" + "id=" + this.id + ", name='" + this.name + '\'' + ", username='" + this.username + '\'' + '}';
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", birthday=" + birthday +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", version=" + version +
+                '}';
     }
 }

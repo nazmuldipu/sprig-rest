@@ -1,6 +1,7 @@
 package com.unololtd.nazmul.springrest.common;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public class PageAttr {

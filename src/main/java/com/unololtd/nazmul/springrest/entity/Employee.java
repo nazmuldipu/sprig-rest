@@ -14,6 +14,10 @@ public class Employee {
 
     Employee() {}
 
+    public Employee(String name) {
+        this.name = name;
+    }
+
     public Employee(String name, String role) {
 
         this.name = name;

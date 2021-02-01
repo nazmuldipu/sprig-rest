@@ -2,16 +2,14 @@ package com.unololtd.nazmul.springrest.controller;
 
 import com.unololtd.nazmul.springrest.assembler.UserModelAssembler;
 import com.unololtd.nazmul.springrest.common.MyUtil;
+import com.unololtd.nazmul.springrest.common.PageAttr;
 import com.unololtd.nazmul.springrest.entity.User;
 import com.unololtd.nazmul.springrest.exception.UserNotFoundException;
 import com.unololtd.nazmul.springrest.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +34,7 @@ public class UserController {
 
     @PostMapping("")
     ResponseEntity<EntityModel<User>> newUser(@RequestBody User user) {
+
         user.setUsername(user.getPhone());
         User newUser = service.save(user);
 
@@ -70,7 +69,6 @@ public class UserController {
 
     @GetMapping("/list")
     public CollectionModel<EntityModel<User>> all() {
-
         List<EntityModel<User>> users = service.getAll().stream() //
                 .map(assembler::toModel) //
                 .collect(Collectors.toList());
@@ -82,7 +80,13 @@ public class UserController {
     @GetMapping(value = "")
     public ResponseEntity<PagedModel<User>> page(Pageable pageable, PagedResourcesAssembler passembler) {
         Page<User> users = this.service.getAll(pageable);
-        PagedModel<User> ur = passembler.toModel(users, linkTo(UserController.class).slash("/page").withSelfRel());
+
+        for(final User user: users.getContent()){
+            Link selfLink = linkTo(methodOn(UserController.class).one(user.getId())).withSelfRel();
+            user.add(selfLink);
+        }
+
+        PagedModel<User> ur = passembler.toModel(users, linkTo(UserController.class).withSelfRel());
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add("Link", MyUtil.createLinkHeader(ur));
         return new ResponseEntity(ur, responseHeaders, HttpStatus.OK);

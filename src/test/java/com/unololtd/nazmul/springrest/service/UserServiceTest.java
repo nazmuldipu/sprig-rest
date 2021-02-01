@@ -5,7 +5,8 @@ import com.unololtd.nazmul.springrest.repository.UserRepository;
 import com.unololtd.nazmul.springrest.service.impl.UserServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+//import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,7 +36,7 @@ public class UserServiceTest {
     UserRepository userRepository;
 
     @Test
-    public void test_getById() {
+    public void should_find_user_getById() {
         //Setup our mock
         long id = 1;
         User mockUser = new User("akib","01912239643", "akib@gmail.com");
@@ -47,17 +48,17 @@ public class UserServiceTest {
         //Execute all Service call
         long userCount = userRepository.count();
         boolean exist = userService.exists(id);
-        Optional<User> returnShip = userService.getById(id);
+        Optional<User> returnUser = userService.getById(id);
 
         //Assert to the response
         Assert.assertEquals(123L, userCount);
         Assert.assertTrue(exist);
-        Assertions.assertTrue(returnShip.isPresent(), "User was not found");
-        Assertions.assertSame(returnShip.get(), mockUser, "User should be the same");
+        Assertions.assertThat(returnUser.get()).isEqualTo(mockUser);
+        Assertions.assertThat(returnUser.isPresent()).isNotNull();
     }
 
     @Test
-    public void test_getAll() {
+    public void should_find_all_users_getAll() {
         //Setup our mock
         User mockUser1 = new User("akib", "01912239643", "akib@gmail.com");
         mockUser1.setId(1L);
@@ -78,10 +79,12 @@ public class UserServiceTest {
         //Assert to the response
         Assert.assertEquals(3L, userService.count());
         Assert.assertEquals(3L, userService.getAll().size());
+
+        Assertions.assertThat(userService.getAll()).hasSize(3).contains(mockUser1, mockUser2, mockUser3);
     }
 
     @Test
-    public void test_searchUser() {
+    public void shoul_find_user_on_searchUser() {
         //Setup our mock
         User mockUser1 = new User("akib", "01912239643", "akib@gmail.com");
         mockUser1.setId(1L);
@@ -106,7 +109,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void test_saveUser() {
+    public void should_store_a_user_on_save() {
         //Setup our mock
         User mockUser1 = new User("akib", "01912239643", "akib@gmail.com");
         mockUser1.setId(1L);
@@ -118,6 +121,11 @@ public class UserServiceTest {
         //Assert to the response
         Assert.assertEquals("User id didn't matched", 1L, response.getId().longValue());
         Assert.assertEquals("01912239643", response.getUsername());
-
+        Assertions.assertThat(response).hasFieldOrProperty("id").isNotNull();
+        Assertions.assertThat(response).hasFieldOrPropertyWithValue("name", "akib");
+        Assertions.assertThat(response).hasFieldOrPropertyWithValue("phone", "01912239643");
+        Assertions.assertThat(response).hasFieldOrPropertyWithValue("email", "akib@gmail.com");
     }
+
+
 }
