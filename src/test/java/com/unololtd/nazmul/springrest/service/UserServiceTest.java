@@ -111,9 +111,10 @@ public class UserServiceTest {
     @Test
     public void should_store_a_user_on_save() {
         //Setup our mock
+        User user = new User("akib", "01912239643", "akib@gmail.com");
+        user.setId(1L);
         User mockUser1 = new User("akib", "01912239643", "akib@gmail.com");
-        mockUser1.setId(1L);
-        Mockito.when(userRepository.save(any(User.class))).thenReturn(mockUser1);
+        Mockito.when(userRepository.save(any(User.class))).thenReturn(user);
 
         //Execute all Service call
         User response = userService.save(mockUser1);

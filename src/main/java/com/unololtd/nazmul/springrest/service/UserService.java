@@ -14,6 +14,9 @@ public interface UserService {
      * */
     Optional<User> getById(Long id);
 
+    /*Find by username or phone*/
+    Optional<User> findByUsernameOrPhone(String username);
+
     /*Return all User in the database
      * @return   All User in the database.
      * */

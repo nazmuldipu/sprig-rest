@@ -2,8 +2,11 @@ package com.unololtd.nazmul.springrest.service.impl;
 
 import com.unololtd.nazmul.springrest.common.PageAttr;
 import com.unololtd.nazmul.springrest.entity.User;
+import com.unololtd.nazmul.springrest.exception.UserAlreadyExist;
+import com.unololtd.nazmul.springrest.exception.UserNotFoundException;
 import com.unololtd.nazmul.springrest.repository.UserRepository;
 import com.unololtd.nazmul.springrest.service.UserService;
+import javassist.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,12 @@ public class UserServiceImpl implements UserService {
             return this.userRepository.findById(id);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> findByUsernameOrPhone(String username) {
+
+        return this.userRepository.findUserByUsername(username);
     }
 
     /*Return all User in the database
@@ -66,12 +75,17 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     public User save(User user) {
-
         //Update Version and set username if first
         if (user.getId() == null) {
+            Optional<User> fUser = this.findByUsernameOrPhone(user.getPhone());
+            if (fUser.isPresent()) throw new UserAlreadyExist(user.getPhone());
+
             user.setVersion(1);
             user.setUsername(user.getPhone());
         } else {
+            Optional<User> fUser = this.getById(user.getId());
+            if (fUser.isEmpty()) throw new UserNotFoundException(user.getId());
+
             user.setVersion(user.getVersion() + 1);
         }
 
@@ -93,7 +107,10 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     public void deleteById(Long id) {
-        this.userRepository.deleteById(id);
+        if (this.exists(id))
+            this.userRepository.deleteById(id);
+        else
+            throw new UserNotFoundException(id);
     }
 
     /*Count number of Users in the database

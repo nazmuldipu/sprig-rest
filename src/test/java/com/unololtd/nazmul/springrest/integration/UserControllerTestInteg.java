@@ -1,6 +1,5 @@
 package com.unololtd.nazmul.springrest.integration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unololtd.nazmul.springrest.entity.User;
 import com.unololtd.nazmul.springrest.repository.UserRepository;
@@ -21,10 +20,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 //@RunWith(SpringRunner.class)
@@ -33,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTestInteg {
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -88,9 +85,9 @@ public class UserControllerTestInteg {
                 .andReturn();
         User oldUser = mapper.readValue(result1.getResponse().getContentAsString(), User.class);
         String newName = "Javed";
-        String newPhone = "01912239644";
+        String newEmail = "akibul@gmail.com";
         postUser.setName(newName);
-        postUser.setPhone(newPhone);
+        postUser.setEmail(newEmail);
 
         final MvcResult result2 = mockMvc.perform(put(BASE_PATH + "/" + oldUser.getId())
                 .content(mapper.writeValueAsBytes(postUser))
@@ -99,8 +96,7 @@ public class UserControllerTestInteg {
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("$.id", is(oldUser.getId().intValue())))
                 .andExpect(jsonPath("$.name", is(newName)))
-                .andExpect(jsonPath("$.phone", is(newPhone)))
-                .andExpect(jsonPath("$.email", is(postUser.getEmail())))
+                .andExpect(jsonPath("$.email", is(newEmail)))
                 .andExpect(jsonPath("$.version", is(2)))
                 .andReturn();
     }
@@ -114,11 +110,11 @@ public class UserControllerTestInteg {
         result
                 .andExpect(jsonPath("_links.self.href", is(BASE_URL + BASE_PATH + "/list")))
 
-                .andExpect(jsonPath("_embedded.userList[2].id", is(this.userList.get(0).getId().intValue())))
-                .andExpect(jsonPath("_embedded.userList[2].name", is(this.userList.get(0).getName())))
-                .andExpect(jsonPath("_embedded.userList[2].phone", is(this.userList.get(0).getPhone())))
-                .andExpect(jsonPath("_embedded.userList[2].email", is(this.userList.get(0).getEmail())))
-                .andExpect(jsonPath("_embedded.userList[2].version", is(1)))
+                .andExpect(jsonPath("_embedded.userList[0].id", is(this.userList.get(0).getId().intValue())))
+                .andExpect(jsonPath("_embedded.userList[0].name", is(this.userList.get(0).getName())))
+                .andExpect(jsonPath("_embedded.userList[0].phone", is(this.userList.get(0).getPhone())))
+                .andExpect(jsonPath("_embedded.userList[0].email", is(this.userList.get(0).getEmail())))
+                .andExpect(jsonPath("_embedded.userList[0].version", is(1)))
 
                 .andExpect(jsonPath("_embedded.userList[1].id", is(this.userList.get(1).getId().intValue())))
                 .andExpect(jsonPath("_embedded.userList[1].name", is(this.userList.get(1).getName())))
@@ -126,11 +122,11 @@ public class UserControllerTestInteg {
                 .andExpect(jsonPath("_embedded.userList[1].email", is(this.userList.get(1).getEmail())))
                 .andExpect(jsonPath("_embedded.userList[1].version", is(1)))
 
-                .andExpect(jsonPath("_embedded.userList[0].id", is(this.userList.get(2).getId().intValue())))
-                .andExpect(jsonPath("_embedded.userList[0].name", is(this.userList.get(2).getName())))
-                .andExpect(jsonPath("_embedded.userList[0].phone", is(this.userList.get(2).getPhone())))
-                .andExpect(jsonPath("_embedded.userList[0].email", is(this.userList.get(2).getEmail())))
-                .andExpect(jsonPath("_embedded.userList[0].version", is(1)));
+                .andExpect(jsonPath("_embedded.userList[2].id", is(this.userList.get(2).getId().intValue())))
+                .andExpect(jsonPath("_embedded.userList[2].name", is(this.userList.get(2).getName())))
+                .andExpect(jsonPath("_embedded.userList[2].phone", is(this.userList.get(2).getPhone())))
+                .andExpect(jsonPath("_embedded.userList[2].email", is(this.userList.get(2).getEmail())))
+                .andExpect(jsonPath("_embedded.userList[2].version", is(1)));
     }
 
     @Test
@@ -138,7 +134,9 @@ public class UserControllerTestInteg {
     public void should_get_user_page() throws Exception {
         this.store_some_user();
 
+
         final ResultActions result = mockMvc.perform(get(BASE_PATH + "?size=3&page=0")).andExpect(status().isOk());
+
         result
                 .andExpect(jsonPath("_links.self.href", is(BASE_URL + BASE_PATH)))
                 .andExpect(jsonPath("page.size", is(3)))
@@ -193,7 +191,7 @@ public class UserControllerTestInteg {
         final MvcResult result = mockMvc.perform(get(BASE_PATH + "/list")).andExpect(status().isOk()).andReturn();
 
         User oldUser = mapper.readValue(result.getResponse().getContentAsString(), User.class);
-        
+
     }
 
     public void store_some_user() throws Exception {

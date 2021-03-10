@@ -2,7 +2,6 @@ package com.unololtd.nazmul.springrest.controller;
 
 import com.unololtd.nazmul.springrest.assembler.UserModelAssembler;
 import com.unololtd.nazmul.springrest.common.MyUtil;
-import com.unololtd.nazmul.springrest.common.PageAttr;
 import com.unololtd.nazmul.springrest.entity.User;
 import com.unololtd.nazmul.springrest.exception.UserNotFoundException;
 import com.unololtd.nazmul.springrest.service.UserService;
@@ -15,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,8 +49,6 @@ public class UserController {
         User updateUser = service.getById(id) //
                 .map(user -> {
                     user.setName(newUser.getName());
-                    user.setPhone(newUser.getPhone());
-                    user.setUsername(newUser.getPhone());
                     user.setEmail(newUser.getEmail());
                     return service.save(user);
                 }) //
@@ -71,6 +69,7 @@ public class UserController {
     public CollectionModel<EntityModel<User>> all() {
         List<EntityModel<User>> users = service.getAll().stream() //
                 .map(assembler::toModel) //
+                .sorted(Comparator.comparingLong(f -> f.getContent().getId()))
                 .collect(Collectors.toList());
 
         return CollectionModel.of(users, //
@@ -81,7 +80,7 @@ public class UserController {
     public ResponseEntity<PagedModel<User>> page(Pageable pageable, PagedResourcesAssembler passembler) {
         Page<User> users = this.service.getAll(pageable);
 
-        for(final User user: users.getContent()){
+        for (final User user : users.getContent()) {
             Link selfLink = linkTo(methodOn(UserController.class).one(user.getId())).withSelfRel();
             user.add(selfLink);
         }

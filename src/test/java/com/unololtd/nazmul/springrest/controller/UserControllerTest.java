@@ -29,9 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-//@WebMvcTest(controllers = UserControllerTestInteg.class)
-//@ActiveProfiles("test")
-//@RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
 @Import({UserModelAssembler.class})
 public class UserControllerTest {
